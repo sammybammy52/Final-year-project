@@ -1,0 +1,88 @@
+	#include "TinyGPS++.h"
+
+
+	//SoftwareSerial serial_connection(10, 11); //RX=pin 10, TX=pin 11
+	TinyGPSPlus gps;//This is the GPS object that will pretty much do all the grunt work with the NMEA data
+
+	String msg = String("");
+	int SmsContentFlag = 0;
+	String mob = "+2348131145569"; //Use commas to add more numbers
+	String loct;
+
+	#define HELP 7
+	void setup()
+	{
+	  Serial.begin(115200);//This opens up communications to the Serial monitor in the Arduino IDE
+	  delay(2000);
+	  pinMode (HELP, INPUT);
+
+	  Serial.println("Finding Module ");
+	  int i = 1;
+	  while (i) {
+		Serial.println("AT");
+		while (Serial.available() > 0) {
+		  if (Serial.find("OK"))
+			i = 0;
+		}
+		delay(2000);
+	  }
+	  Serial.println("Module Connected");
+
+	  Serial.println("AT+GPS=1");
+	  Serial.println("GPS Intializing...");
+	  delay(20000);
+	  Serial.println("GPS Initialized");
+
+	  Serial.println("Text Mode: ");
+	  i = 1;
+	  while (i) {
+		Serial.println("AT+CMGF=1\r");
+		while (Serial.available() > 0) {
+		  if (Serial.find("OK"))
+			i = 0;
+		}
+		delay(20000);
+	  }
+
+	  i = 1;
+	  String str;
+	  while (i) {
+		Serial.println("AT+LOCATION=2");
+		delay(100);
+		while (Serial.available() <= 0);
+		if (Serial.find("AT+LOCATION=2")) {
+		  str = Serial.readString();
+		  //Serial.println(str);
+		  i = 0;
+		}
+		delay(2000);
+	  }
+	  loct = str.substring(4, 23);
+	  Serial.print("Location: ");
+	  Serial.println(loct);
+
+	  String cmd = "AT+CMGS=\"";
+	  cmd += mob;
+	  cmd += "\"";
+	  cmd += "\r";
+	  Serial.println(cmd);
+	  delay(100);
+
+	  Serial.print("Please come to my Resure. My Current Location is ");
+	  Serial.print(loct);
+	  Serial.print("\n");
+	  Serial.print("Check Map: \n");
+	  Serial.print("https://www.google.com/maps/@");
+	  Serial.println(loct);
+	  Serial.println((char)26);
+	  delay(1000);
+
+	}
+
+	void loop()
+	{
+	  // if (digitalRead(HELP) == HIGH) {
+
+
+	  // }
+	}
